@@ -1,0 +1,11 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: your_name
+      changes:
+        - addForeignKeyConstraint:
+            baseTableName: branch
+            baseColumnNames: message_start_id
+            referencedTableName: message
+            referencedColumnNames: id
+            constraintName: fk_branches_message_start_id

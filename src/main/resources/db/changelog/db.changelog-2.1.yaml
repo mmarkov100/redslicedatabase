@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: your_name
+      changes:
+        - addColumn:
+            tableName: chat
+            columns:
+              - column:
+                  name: selected_branch_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableName: chat
+            baseColumnNames: selected_branch_id
+            referencedTableName: branch
+            referencedColumnNames: id
+            constraintName: fk_chats_selected_branch_id

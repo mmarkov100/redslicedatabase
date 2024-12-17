@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: your_name
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: starred_chat_id
+                  type: BIGINT
+                  constraints:
+                    nullable: true
+        - addForeignKeyConstraint:
+            baseTableName: app_user
+            baseColumnNames: starred_chat_id
+            referencedTableName: chat
+            referencedColumnNames: id
+            constraintName: fk_users_starred_chat_id
