@@ -17,8 +17,10 @@ import redslicedatabase.redslicedatabase.dto.MessageDTO.outbound.MessageDTO;
 import redslicedatabase.redslicedatabase.logging.LogModel;
 import redslicedatabase.redslicedatabase.model.Branch;
 import redslicedatabase.redslicedatabase.model.Message;
+import redslicedatabase.redslicedatabase.model.User;
 import redslicedatabase.redslicedatabase.service.BranchService;
 import redslicedatabase.redslicedatabase.service.MessageService;
+import redslicedatabase.redslicedatabase.service.UserService;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,35 +37,50 @@ public class MessageController {
     private MessageService messageService;
     @Autowired
     private LogModel logModel;
+    @Autowired
+    private UserService userService;
 
     // Создание нового сообщения
     @PostMapping
     public ResponseEntity<MessageDTO> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
+        // Проверяем доступ к ветке
+        Branch branch = messageService.validateBranchAccess(createMessageDTO.getBranchId(), createMessageDTO.getUidFirebase());
 
-        Message message = messageService.convertToModel(createMessageDTO); // конвертируем в DTO
+        // Конвертируем DTO в модель
+        Message message = messageService.convertToModel(createMessageDTO);
+
+        // Логирование полученного сообщения
         logModel.logger(message, "Received message");
 
-        Message createdMessage = messageService.createMessage(message);// Сохраняем сообщение
+        // Сохраняем сообщение
+        Message createdMessage = messageService.createMessage(message);
 
-        Optional<Branch> branch = branchService.getBranchById(message.getBranch().getId()); // Привязка сообщения к ветке
-        createdMessage.setBranch(branch.orElseThrow(() -> new RuntimeException("Branch not found")));
+        // Обновляем даты у ветки и чата
+        branchService.updateBranchAndChatDates(branch);
 
-        MessageDTO messageDTO = messageService.convertToDTO(createdMessage); // Возвращаем DTO
-
+        // Возвращаем DTO
+        MessageDTO messageDTO = messageService.convertToDTO(createdMessage);
         return ResponseEntity.ok(messageDTO);
     }
 
     // Создания сразу двух новых сообщений, от пользователя и нейросети
     @PostMapping("/pair")
     public ResponseEntity<List<MessageDTO>> saveMessagePair(@Valid @RequestBody CreateMessagePairDTO createMessagePairDTO) {
-        logger.info("Received message pair for branch ID: {}", createMessagePairDTO.getBranchId());
+        logger.info("Received message pair for branch ID: {}", createMessagePairDTO.toString());
 
-        // Сохраняем сообщения в бд
+        // Проверяем доступ к ветке
+        Branch branch = messageService.validateBranchAccess(createMessagePairDTO.getBranchId(),
+                createMessagePairDTO.getMessages().getFirst().getUidFirebase());
+
+        // Сохраняем сообщения в базе данных
         messageService.saveMessagePair(createMessagePairDTO);
 
         // Получаем историю сообщений ветки
         List<Message> branchMessages = messageService.getMessagesByBranchId(createMessagePairDTO.getBranchId());
         List<MessageDTO> messageDTOs = messageService.convertToDTO(branchMessages);
+
+        // Обновляем даты у ветки и чата
+        branchService.updateBranchAndChatDates(branch);
 
         logger.info("Saved message pair and retrieved branch history, total messages: {}", messageDTOs.size());
         return ResponseEntity.ok(messageDTOs);
@@ -72,7 +89,27 @@ public class MessageController {
     // Получение сообщений для ветки
     @GetMapping("/branch/{id}")
     public ResponseEntity<List<MessageDTO>> getMessagesByBranchId(@PathVariable Long id) {
-        logger.info("Got branch id: {}", id);
+        logger.info("GET: Got branch id: {}", id);
+        List<Message> messages = messageService.getMessagesByBranchId(id);
+        List<MessageDTO> messageDTOS = messageService.convertToDTO(messages);
+        return messageDTOS.isEmpty() // Проверка, пустой ли массив или нет
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(messageDTOS);
+    }
+
+    // Получение сообщений для ветки с валидацией
+    @GetMapping("/branch/{id}/validate")
+    public ResponseEntity<List<MessageDTO>> getMessagesByBranchIdAndFirebase(@PathVariable Long id,
+                                                                             @RequestParam String uidFirebase) {
+        Branch branch = branchService.getBranchById(id)
+                .orElseThrow(() -> new RuntimeException("Branch not found"));
+        User user = userService.getUserByUidFirebase(uidFirebase)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (branch.getUser() != user)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+        logger.info("GET UID: Got branch id: {}", id);
         List<Message> messages = messageService.getMessagesByBranchId(id);
         List<MessageDTO> messageDTOS = messageService.convertToDTO(messages);
         return messageDTOS.isEmpty() // Проверка, пустой ли массив или нет
@@ -91,6 +128,23 @@ public class MessageController {
         }
 
         MessageDTO messageDTO = messageService.convertToDTO(message.get()); // Преобразуем в DTO
+        return ResponseEntity.ok(messageDTO);
+    }
+
+    // Получить сообщение по его ID с валидацией
+    @GetMapping("/{id}/validate")
+    public ResponseEntity<MessageDTO> getMessageByIdAndFirebase(@PathVariable Long id,
+                                                                @RequestParam String uidFirebase) {
+        Message message = messageService.getMessageById(id)
+                .orElseThrow(() -> new RuntimeException("Message not found"));
+        User user = userService.getUserByUidFirebase(uidFirebase)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (message.getUser() != user)
+        {
+            return ResponseEntity.badRequest().build();
+        }
+
+        MessageDTO messageDTO = messageService.convertToDTO(message); // Преобразуем в DTO
         return ResponseEntity.ok(messageDTO);
     }
 

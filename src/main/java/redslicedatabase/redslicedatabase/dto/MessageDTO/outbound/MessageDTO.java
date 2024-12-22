@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public class MessageDTO {
     private Long id;
+    private Long userId;
     private Long branchId;
     private String role;
     private String text;
@@ -17,6 +18,7 @@ public class MessageDTO {
     private LocalDateTime dateCreate;
 
     public MessageDTO(Long id,
+                      Long userId,
                       Long branchId,
                       String role,
                       String text,
@@ -26,6 +28,7 @@ public class MessageDTO {
                       LocalDateTime dateCreate
                       ) {
         this.id = id;
+        this.userId = userId;
         this.branchId = branchId;
         this.role = role;
         this.text = text;
@@ -44,6 +47,12 @@ public class MessageDTO {
     }
     public void setId(Long id) {
         this.id = id;
+    }
+    public Long getUserId() {
+        return userId;
+    }
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
     public Long getBranchId() {
         return branchId;

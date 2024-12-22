@@ -30,6 +30,10 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // Пользователь, к которому и относится сообщение
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "branch_id", nullable = false)
     private Branch branch; // Ветка, к которой принадлежит сообщение
@@ -61,6 +65,8 @@ public class Message {
 
         this.id = id;
     }
+    public User getUser() {return user;}
+    public void setUser(User user) {this.user = user;}
     public Branch getBranch(){
         return branch;
     }

@@ -19,6 +19,10 @@ public class Branch {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // Пользователь, к которому и относится ветка
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chat_id", nullable = false)
     private Chat chat; // Чат, к которому принадлежит ветка
 
@@ -51,6 +55,8 @@ public class Branch {
     public void setId(Long id){
         this.id = id;
     }
+    public User getUser() {return user;}
+    public void setUser(User user) {this.user = user;}
     public Chat getChat(){
         return chat;
     }
@@ -74,6 +80,12 @@ public class Branch {
     }
     public void setIsRoot(Boolean isRoot){
         this.isRoot = isRoot;
+    }
+    public List<Branch> getChildBranches() {
+        return childBranches;
+    }
+    public void setChildBranches(List<Branch> childBranches) {
+        this.childBranches = childBranches;
     }
     public LocalDateTime getDateEdit() {
         return dateEdit;

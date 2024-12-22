@@ -39,15 +39,21 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserByEmail(String email) {
+    public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    public User getUserByUidFirebase(String uidFirebase) {
+    public Optional<User> getUserByUidFirebase(String uidFirebase) {
         return userRepository.findByUidFirebase(uidFirebase);
     }
 
-    // Преобразуем User в UserDTO для отправки овтета
+    // Получение id пользователя по uid файрбейза
+    public Long getUserIdByUidFirebase(String uidFirebase) {
+        Optional<User> user = userRepository.findByUidFirebase(uidFirebase);
+        return user.map(User::getId).orElse(null); // проверка, существует ли вообще такой пользователю
+    }
+
+    // Преобразуем User в UserDTO для отправки ответа
     public UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),
@@ -85,6 +91,8 @@ public class UserService {
         }
         return userRepository.save(existingUser);
     }
+
+
 
     // Метод удаления пользователя по ID
     @Transactional

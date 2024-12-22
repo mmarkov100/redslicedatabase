@@ -13,13 +13,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import redslicedatabase.redslicedatabase.dto.BranchDTO.inbound.CreateBranchDTO;
 import redslicedatabase.redslicedatabase.dto.BranchDTO.outbound.BranchDTO;
-import redslicedatabase.redslicedatabase.logging.LogModel;
 import redslicedatabase.redslicedatabase.model.Branch;
 import redslicedatabase.redslicedatabase.model.Chat;
 import redslicedatabase.redslicedatabase.service.BranchService;
 import redslicedatabase.redslicedatabase.service.ChatService;
+import redslicedatabase.redslicedatabase.service.UserService;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -29,27 +31,17 @@ public class BranchController {
     private static final Logger logger = LoggerFactory.getLogger(BranchController.class);
 
     @Autowired
-    private ChatService chatService;
-    @Autowired
     private BranchService branchService;
     @Autowired
-    private LogModel logModel;
+    private UserService userService;
+    @Autowired
+    private ChatService chatService;
 
     // Создать новую ветку
     @PostMapping
     public ResponseEntity<BranchDTO> createBranch(@Valid @RequestBody CreateBranchDTO createBranchDTO) {
 
-        // Преобразуем в класс модели ветки
-        Branch branch = branchService.convertToModel(createBranchDTO);
-        logModel.logger(branch, "Received branch");
-
-        Branch createdBranch = branchService.createBranch(branch);// Сохраняем ветку
-
-        // Привязка ветки к чату
-        Optional<Chat> chat = chatService.getChatById(branch.getChat().getId());
-        createdBranch.setChat(chat.orElseThrow(() -> new RuntimeException("Chat not found")));
-
-        // Возвращаем DTO вместо сущности
+        Branch createdBranch = branchService.createBranch(createBranchDTO);
         return ResponseEntity.ok(branchService.convertToDTO(createdBranch));
     }
 
@@ -59,21 +51,47 @@ public class BranchController {
     @GetMapping("/{id}")
     public ResponseEntity<BranchDTO> getBranchById(@PathVariable Long id) {
 
-        Optional<Branch> branch = branchService.getBranchById(id); // Получаем от сервиса данные
+        // Получаем от сервиса данные
+        Optional<Branch> branch = branchService.getBranchById(id);
         if (branch.isEmpty()) { // Если чат не найден, возвращаем 404 Not Found
             logger.warn("GET ID: Branch with ID {} not found", id);
             return ResponseEntity.notFound().build();
         }
 
-        BranchDTO branchDTO = branchService.convertToDTO(branch.get()); // Преобразуем в DTO
+        // Преобразуем в DTO
+        BranchDTO branchDTO = branchService.convertToDTO(branch.get());
         return ResponseEntity.ok(branchDTO);
+    }
+
+    // Получение конкретной ветки с валидацией пользователя
+    @GetMapping("/{id}/validate")
+    public ResponseEntity<BranchDTO> getBranchByIdAndUidFirebase(@PathVariable Long id,
+                                                                 @RequestParam String uidFirebase) throws AccessDeniedException {
+
+        Branch branch = branchService.getBranchByIdWithAccessCheck(id, uidFirebase);
+        // Преобразуем в DTO и отправляем
+        return ResponseEntity.ok(branchService.convertToDTO(branch));
     }
 
     // Получение всех веток чата
     @GetMapping("/chat/{id}")
     public ResponseEntity<List<BranchDTO>> getBranchByChatId(@PathVariable Long id) {
-        logger.info("Got chat id: {}", id);
+        logger.info("GET ID: Got chat id: {}", id);
         List<Branch> branches = branchService.getBranchesByChatId(id);
+        List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
+        return branchDTOs.isEmpty() // Проверка, пустой ли массив или нет
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(branchDTOs);
+    }
+
+    // Получение всех веток чата с валидацией пользователя
+    @GetMapping("/chat/{chatId}/validate")
+    public ResponseEntity<List<BranchDTO>> getBranchByChatIdAndFirebase(@PathVariable Long chatId,
+                                                                        @RequestParam String uidFirebase) throws AccessDeniedException {
+        chatService.getChatByIdWithAccessCheck(chatId, uidFirebase); // Проверка на доступность чата пользователю
+
+        logger.info("GET UID: Got chat id: {}", chatId);
+        List<Branch> branches = branchService.getBranchesByChatId(chatId);
         List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
         return branchDTOs.isEmpty() // Проверка, пустой ли массив или нет
                 ? ResponseEntity.notFound().build()
@@ -82,30 +100,34 @@ public class BranchController {
 
     // Получение всех веток пользователя
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<List<BranchDTO>>> getBranchByUserId(@PathVariable Long id) {
-        logger.info("Got user id: {}", id);
+    public ResponseEntity<List<BranchDTO>> getBranchesByUserId(@PathVariable Long id) {
+        List<Branch> branches = branchService.getBranchesByUserId(id);
+        List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
+        return branchDTOs.isEmpty()
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(branchDTOs);
+    }
 
-        // Получаем все чаты пользователя
-        List<Chat> chats = chatService.getChatsByUserId(id);
-
-        // Получаем ветки для каждого чата и преобразовать их в BranchDTO
-        List<List<BranchDTO>> branchesByChats = chats.stream()
-                .map(chat -> {
-                    List<Branch> branches = branchService.getBranchesByChatId(chat.getId());
-                    return branches.stream()
-                            .map(branchService::convertToDTO) // Преобразование Branch -> BranchDTO
-                            .toList();
-                })
-                .toList();
-
-        return ResponseEntity.ok(branchesByChats);
+    // Получение всех веток пользователя с валидацией
+    @GetMapping("/user/uid/{uidFirebase}")
+    public ResponseEntity<List<BranchDTO>> getBranchesByUID(@PathVariable String uidFirebase) {
+        List<Branch> branches = branchService.getBranchesByUserUidFirebase(uidFirebase);
+        List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
+        return branchDTOs.isEmpty()
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(branchDTOs);
     }
 
     // Получение всех веток
     @GetMapping
     public ResponseEntity<List<BranchDTO>> getAllBranches() {
-        List<Branch> branches = branchService.getBranches(); // Получаем все чаты
-        List<BranchDTO> branchDTOs = branchService.convertToDTO(branches); // Конвертируем в DTO
+
+        // Получаем все ветки
+        List<Branch> branches = branchService.getBranches();
+
+        // Конвертируем в DTO
+        List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
+
         return branchDTOs.isEmpty() // Проверка, пустой ли массив или нет
                 ? ResponseEntity.notFound().build()
                 : ResponseEntity.ok(branchDTOs);
@@ -114,8 +136,13 @@ public class BranchController {
     // Получить дочерние ветки от ветки
     @GetMapping("/{id}/children")
     public ResponseEntity<List<BranchDTO>> getChildBranches(@PathVariable Long id) {
+
+        // Получаем все ветки
         List<Branch> childBranches = branchService.getChildBranches(id);
-        List<BranchDTO> branchDTOs = branchService.convertToDTO(childBranches); // Конвертируем в DTO
+
+        // Конвертируем в DTO
+        List<BranchDTO> branchDTOs = branchService.convertToDTO(childBranches);
+
         return branchDTOs.isEmpty() // Проверка, пустой ли массив или нет
                 ? ResponseEntity.notFound().build()
                 : ResponseEntity.ok(branchDTOs);
@@ -123,10 +150,16 @@ public class BranchController {
 
     // Каскадное удаление ветки
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBranchById(@PathVariable Long id) {
-        logger.info("Deleting user with ID: {}", id);
-
+    public ResponseEntity<Void> deleteBranchByIdAndFirebase(@PathVariable Long id) {
         branchService.deleteBranchById(id);
+        return ResponseEntity.noContent().build(); // Возвращает 204 No Content
+    }
+
+    // Каскадное удаление ветки с проверкой доступа
+    @DeleteMapping("/{id}/validate")
+    public ResponseEntity<Void> deleteBranchById(@PathVariable Long id,
+                                                 @RequestParam String uidFirebase) throws AccessDeniedException {
+        branchService.deleteBranchByIdWithAccessCheck(id, uidFirebase);
         return ResponseEntity.noContent().build(); // Возвращает 204 No Content
     }
 }

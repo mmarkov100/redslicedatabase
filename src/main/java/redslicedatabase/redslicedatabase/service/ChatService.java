@@ -4,6 +4,7 @@ package redslicedatabase.redslicedatabase.service;
 Сервис для чатов
  */
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,10 @@ import redslicedatabase.redslicedatabase.repository.BranchRepository;
 import redslicedatabase.redslicedatabase.repository.ChatRepository;
 import redslicedatabase.redslicedatabase.repository.UserRepository;
 
+import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -33,7 +36,13 @@ public class ChatService {
     @Autowired
     private BranchRepository branchRepository;
 
+    // Сохраняет чат
+    public void saveChat(Chat chat) {
+        chatRepository.save(chat);
+    }
+
     // Создать чат, сразу вместе с выбранной корневой веткой
+    @Transactional
     public Chat createChat(Chat chat) {
         Chat savedChat = chatRepository.save(chat);// Сохраняем чат
         Branch rootBranch = createRootBranch(savedChat); // Создаем корневую ветку
@@ -45,9 +54,12 @@ public class ChatService {
     private Branch createRootBranch(Chat chat) {
         Branch rootBranch = new Branch();
         rootBranch.setChat(chat);
+        rootBranch.setUser(chat.getUser());
         rootBranch.setParentBranch(null);
         rootBranch.setMessageStart(null);
         rootBranch.setIsRoot(true);
+        rootBranch.setDateCreate(LocalDateTime.now());
+        rootBranch.setDateEdit(LocalDateTime.now());
         return branchRepository.save(rootBranch);
     }
 
@@ -70,12 +82,12 @@ public class ChatService {
     public ChatDTO convertToDTO(Chat chat) {
         return new ChatDTO(
                 chat.getId(),
-                chat.getUser() != null ? chat.getUser().getId() : null, // Проверка на null
+                Optional.ofNullable(chat.getUser()).map(User::getId).orElse(null),
                 chat.getChatName(),
                 chat.getTemperature(),
                 chat.getContext(),
                 chat.getModelUri(),
-                chat.getSelectedBranch() != null ? chat.getSelectedBranch().getId() : null, // Проверка на null
+                Optional.ofNullable(chat.getSelectedBranch()).map(Branch::getId).orElse(null),
                 chat.getDateEdit(),
                 chat.getDateCreate()
         );
@@ -86,12 +98,12 @@ public class ChatService {
         return chats.stream() // Преобразуем список чатов в DTO список
                 .map(chat -> new ChatDTO(
                         chat.getId(),
-                        chat.getUser() != null ? chat.getUser().getId() : null, // Проверка на null
+                        Optional.ofNullable(chat.getUser()).map(User::getId).orElse(null),
                         chat.getChatName(),
                         chat.getTemperature(),
                         chat.getContext(),
                         chat.getModelUri(),
-                        chat.getSelectedBranch() != null ? chat.getSelectedBranch().getId() : null, // Проверка на null
+                        Optional.ofNullable(chat.getSelectedBranch()).map(Branch::getId).orElse(null),
                         chat.getDateEdit(),
                         chat.getDateCreate()
                 ))
@@ -101,8 +113,8 @@ public class ChatService {
     // Метод конвертации CreateChatDTO, класса для получения данных об создании чата, в класс Chat
     public Chat convertToModel(CreateChatDTO createChatDTO) {
         // Загружаем пользователя из базы данных
-        User user = userRepository.findById(createChatDTO.getUserId()) // Если пользователь не найден, выкинет ошибку
-                .orElseThrow(() -> new RuntimeException("User with ID " + createChatDTO.getUserId() + " not found"));
+        User user = userRepository.findByUidFirebase(createChatDTO.getUidFirebase()) // Если пользователь не найден, выкинет ошибку
+                .orElseThrow(() -> new RuntimeException("User with UID " + createChatDTO.getUidFirebase() + " not found"));
 
         Chat chat = new Chat(); // Создаем новый объект Chat и сохраняем в него данные
         chat.setUser(user);
@@ -139,13 +151,28 @@ public class ChatService {
         return chatRepository.save(existingChat);
     }
 
-    // Метод удаления чата по ID
-    @Transactional
-    public void deleteChatById(Long id) {
-        if (!chatRepository.existsById(id)) {
-            throw new RuntimeException("Chat with ID " + id + " not found.");
+    // Метод проверки чата конкретному пользователю
+    public Chat getChatByIdWithAccessCheck(Long chatId, String uidFirebase) throws AccessDeniedException {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new EntityNotFoundException("Chat with ID " + chatId + " not found"));
+
+        if (!Objects.equals(chat.getUser().getUidFirebase(), uidFirebase)) {
+            throw  new AccessDeniedException("Access denied for user UID: " + uidFirebase);
         }
 
-        chatRepository.deleteById(id);
+        return chat;
+    }
+
+    // Метод каскадного удаления чата (не удаляет, если не подтвердится удаление всего) по ID с учетом доступа юзера к чату
+    @Transactional
+    public void deleteChatByIdWithAccessCheck(Long chatId, String uidFirebase) throws AccessDeniedException {
+        Chat chat = chatRepository.findById(chatId)
+                .orElseThrow(() -> new EntityNotFoundException("Chat with ID " + chatId + " not found"));
+
+        if (!Objects.equals(chat.getUser().getUidFirebase(), uidFirebase)) {
+            throw new AccessDeniedException("User does not have access to this chat");
+        }
+
+        chatRepository.deleteById(chatId);
     }
 }

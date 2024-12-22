@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 
 public class BranchDTO {
     private Long id;
+    private Long userId;
     private Long chatId;
     private Long parentBranchId;
     private Long messageStartId;
@@ -17,6 +18,7 @@ public class BranchDTO {
 
     // Конструктор
     public BranchDTO(Long id,
+                     Long userId,
                      Long chatId,
                      Long parentBranchId,
                      Long messageStartId,
@@ -25,6 +27,7 @@ public class BranchDTO {
                      LocalDateTime dateCreate
     ) {
         this.id = id;
+        this.userId = userId;
         this.chatId = chatId;
         this.parentBranchId = parentBranchId;
         this.messageStartId = messageStartId;
@@ -35,6 +38,7 @@ public class BranchDTO {
 
     // Геттеры
     public Long getId() { return id; }
+    public Long getUserId() { return userId;}
     public Long getChatId() { return chatId; }
     public Long getParentBranchId() { return parentBranchId; }
     public Long getMessageStartId() { return messageStartId; }

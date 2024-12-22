@@ -4,7 +4,12 @@ package redslicedatabase.redslicedatabase.dto.MessageDTO.inbound;
 DTO для создания нового сообщения
  */
 
+import jakarta.validation.constraints.NotNull;
+
 public class CreateMessageDTO {
+    @NotNull(message = "UID Firebase cannot be null")
+    private String uidFirebase;
+    @NotNull(message = "Branch cannot be null")
     private Long branchId;
     private String role;
     private String text;
@@ -17,6 +22,12 @@ public class CreateMessageDTO {
 
 
     // Геттеры и сеттеры
+    public String getUidFirebase() {
+        return uidFirebase;
+    }
+    public void setUidFirebase() {
+        this.uidFirebase = uidFirebase;
+    }
     public Long getBranchId() {
         return branchId;
     }

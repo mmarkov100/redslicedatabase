@@ -20,6 +20,8 @@ import redslicedatabase.redslicedatabase.model.User;
 import redslicedatabase.redslicedatabase.service.ChatService;
 import redslicedatabase.redslicedatabase.service.UserService;
 
+import java.nio.file.AccessDeniedException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,12 +40,13 @@ public class ChatController {
 
     // Создать новый чат
     @PostMapping
-    public ResponseEntity<ChatDTO> createChat(@Valid @RequestBody CreateChatDTO createChatDTO) {
+    public ResponseEntity<ChatDTO> createChat(@RequestBody CreateChatDTO createChatDTO) {
 
         Chat chat = chatService.convertToModel(createChatDTO); // Конвертируем полученный DTO в модель
         logModel.logger(chat, "Received chat"); // Вывод логов пришедших данных в чат
 
-        User user = userService.getUserById(chat.getUser().getId()).orElseThrow(() -> new RuntimeException("User not found")); // Или кастомное исключение
+        User user = userService.getUserById(chat.getUser().getId())
+                .orElseThrow(() -> new RuntimeException("User not found")); // Или кастомное исключение
 
         chat.setUser(user); // Привязываем чат к юзеру
         Chat createdChat = chatService.createChat(chat);  // Сохраняем
@@ -67,10 +70,32 @@ public class ChatController {
         return ResponseEntity.ok(chatDTO);
     }
 
+    // Получение конкретного чата по Id и проверка, есть ли доступ у пользователя к этому чату
+    @GetMapping("/{id}/validate")
+    public ResponseEntity<ChatDTO> getChatByIdAndUidFirebase(@PathVariable Long id,
+                                                             @RequestParam String uidFirebase) throws AccessDeniedException {
+
+        Chat chat = chatService.getChatByIdWithAccessCheck(id, uidFirebase); // Отправляем в сервис
+        logModel.logger(chat, "Got chat by id");
+        return ResponseEntity.ok(chatService.convertToDTO(chat));
+    }
+
     // Получить все чаты пользователя по его id
     @GetMapping("/user/{id}")
     public ResponseEntity<List<ChatDTO>> getChatsByUserId(@PathVariable Long id) {
         logger.info("Got user id: {}", id);
+        List<Chat> chats = chatService.getChatsByUserId(id); // Получаем список чатов пользователя
+        List<ChatDTO> chatDTOS = chatService.convertToDTO(chats); // Преобразуем список чатов в DTO список
+        return chatDTOS.isEmpty() // Проверка на пустоту списка вместе с отправкой
+                ? ResponseEntity.notFound().build()
+                : ResponseEntity.ok(chatDTOS);
+    }
+
+    // Получить все чаты пользователя по его uid файрбейза
+    @GetMapping("/user/uid/{uidFirebase}")
+    public ResponseEntity<List<ChatDTO>> getChatsByUserIdAndFirebase(@PathVariable String uidFirebase) {
+        logger.info("Got user uid: {}", uidFirebase);
+        Long id = userService.getUserIdByUidFirebase(uidFirebase); // Получаем id пользователя по uid файрбейза
         List<Chat> chats = chatService.getChatsByUserId(id); // Получаем список чатов пользователя
         List<ChatDTO> chatDTOS = chatService.convertToDTO(chats); // Преобразуем список чатов в DTO список
         return chatDTOS.isEmpty() // Проверка на пустоту списка вместе с отправкой
@@ -90,24 +115,27 @@ public class ChatController {
 
     // Изменить настройки существующего чата по id
     @PutMapping("/{id}")
-    public ResponseEntity<ChatDTO> updateChat(@PathVariable Long id, @Valid @RequestBody UpdateChatDTO updatedChatDTO) {
-        Optional<Chat> existingChatOpt = chatService.getChatById(id); // Получаем существующий чат по id
-        if (existingChatOpt.isEmpty()) { // Если чат найденный по id пустой, то выдаем, что чат пустой
-            logger.warn("Chat with ID {} not found.", id);
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ChatDTO> updateChat(@PathVariable Long id,
+                                              @Valid @RequestBody UpdateChatDTO updatedChatDTO) throws AccessDeniedException {
 
-        Chat savedChat = chatService.updateSettings(existingChatOpt.get(), updatedChatDTO); // Сохраняем обновленный чат и обновляем настройки
+        // Отправляем проверку доступа и получение чата в сервис
+        Chat chat = chatService.getChatByIdWithAccessCheck(id,updatedChatDTO.getUidFirebase());
+
+        // Сохраняем обновленный чат и обновляем настройки
+        Chat savedChat = chatService.updateSettings(chat, updatedChatDTO);
+
+        // Обновление dateEdit у чата, к которому принадлежит ветка
+        savedChat.setDateEdit(LocalDateTime.now()); // Обновляем дату
+        chatService.saveChat(savedChat); // Сохраняем изменения в базе данных
 
         return ResponseEntity.ok(chatService.convertToDTO(savedChat));// Преобразуем в DTO и возвращаем
     }
 
-    // Каскадное удаление чата
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteChatById(@PathVariable Long id) {
-        logger.info("Deleting chat with ID: {}", id);
-
-        chatService.deleteChatById(id);
-        return ResponseEntity.noContent().build(); // Возвращает 204 No Content
+    // Каскадное удаление чата с проверкой доступа
+    @DeleteMapping("/{id}/validate")
+    public ResponseEntity<Void> deleteChatById(@PathVariable Long id,
+                                               @RequestParam String uidFirebase) throws AccessDeniedException {
+        chatService.deleteChatByIdWithAccessCheck(id, uidFirebase);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -6,11 +6,14 @@ DTO класс для обновления настроек чата
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 
 public class UpdateChatDTO {
 
+    @NotNull(message = "UID Firebase cannot be null")
+    private String uidFirebase;
     @Size(max = 255, message = "Chat name cannot exceed 255 characters")
     private String chatName;
     @DecimalMin(value = "0.0", inclusive = true, message = "Temperature must be greater than or equal to 0")
@@ -26,6 +29,9 @@ public class UpdateChatDTO {
 
 
     // Геттеры и сеттеры
+    public String getUidFirebase() {return uidFirebase;}
+    public void setUidFirebase(String uidFirebase) {this.uidFirebase = uidFirebase;}
+
     public String getChatName() { return chatName; }
     public void setChatName(String chatName) { this.chatName = chatName; }
 

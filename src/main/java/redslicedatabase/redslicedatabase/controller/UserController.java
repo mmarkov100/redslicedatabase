@@ -54,6 +54,36 @@ public class UserController {
         return ResponseEntity.ok(userService.convertToDTO(user.get())); // Конвертируем в UserDTO и отправляем ответ
     }
 
+
+    // Получить пользователя по email или uidFirebase
+    @GetMapping("/query")
+    public ResponseEntity<UserDTO> getUserByQuery(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String uidFirebase) {
+        if (email != null) {
+            Optional<User> user = userService.getUserByEmail(email);
+            if (user.isEmpty()) {
+                logger.warn("GET: User with email {} not found.", email);
+                return ResponseEntity.notFound().build();
+            }
+            logModel.logger(user.get(), "Got user");
+            return ResponseEntity.ok(userService.convertToDTO(user.get()));
+        }
+
+        if (uidFirebase != null) {
+            Optional<User> user = userService.getUserByUidFirebase(uidFirebase);
+            if (user.isEmpty()) {
+                logger.warn("GET: User with UID firebase {} not found.", uidFirebase);
+                return ResponseEntity.notFound().build();
+            }
+            logModel.logger(user.get(), "Got user");
+            return ResponseEntity.ok(userService.convertToDTO(user.get()));
+        }
+
+        // Если параметры отсутствуют
+        return ResponseEntity.badRequest().build();
+    }
+
     // Получить всех существующих пользователей
     @GetMapping()
     public ResponseEntity<List<UserDTO>> getUsers (){
@@ -78,12 +108,40 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
 
-    // Каскадное удаление пользователя
+    // Обновление настроек пользователя по uid файрбейза
+    @PutMapping("/uid/{uidFirebase}")
+    public ResponseEntity<UserDTO> updateUserByUID(@PathVariable String uidFirebase, @Valid @RequestBody UpdateUserDTO updatedUser){
+
+        Optional<User> existingUser = userService.getUserByUidFirebase(uidFirebase); // Проверяем, существует ли пользователь с указанным uid файрбейза
+        if (existingUser.isEmpty()) return ResponseEntity.notFound().build();  // Если пользователь не найден, возвращаем 404
+
+        // Обновляем информацию у пользователя
+        User savedUser = userService.updateSettings(existingUser.get(), updatedUser);
+
+        // Возвращаем обновленного пользователя в UserDTO
+        UserDTO userDTO = userService.convertToDTO(savedUser);
+        return ResponseEntity.ok(userDTO);
+
+    }
+
+    // Каскадное удаление пользователя по id
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
         logger.info("Deleting user with ID: {}", id);
 
         userService.deleteUserById(id);
+        return ResponseEntity.noContent().build(); // Возвращает 204 No Content
+    }
+
+    // Каскадное удаление пользователя по uid файрбейза
+    @DeleteMapping("/uid/{uidFirebase}")
+    public ResponseEntity<Void> deleteUserByUid(@PathVariable String uidFirebase) {
+        logger.info("Deleting user with UID: {}", uidFirebase);
+
+        Optional<User> existingUser = userService.getUserByUidFirebase(uidFirebase); // Ищем пользователя по uid
+        if (existingUser.isEmpty()) return ResponseEntity.notFound().build();  // Если пользователь не найден, возвращаем 404
+
+        userService.deleteUserById(existingUser.get().getId()); // Удаляем пользователя по id
         return ResponseEntity.noContent().build(); // Возвращает 204 No Content
     }
 }

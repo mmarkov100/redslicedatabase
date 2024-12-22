@@ -35,6 +35,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) //
     private List<Chat> chats; // Список чатов пользователя
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) //
+    private List<Branch> branches; // Список веток пользователя
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true) //
+    private List<Message> messages; // Список сообщений пользователя
+
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания пользователя
 
 
