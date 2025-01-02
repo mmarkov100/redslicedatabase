@@ -56,8 +56,8 @@ public class ChatController {
         return ResponseEntity.ok(chatDTO);
     }
 
-    // Получение конкретного чата по Id
-    @GetMapping("/{id}")
+    // Получение конкретного чата по Id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}")
     public ResponseEntity<ChatDTO> getChatById(@PathVariable Long id) {
 
         Optional<Chat> chat = chatService.getChatById(id); // Получаем от сервиса данные
@@ -80,8 +80,8 @@ public class ChatController {
         return ResponseEntity.ok(chatService.convertToDTO(chat));
     }
 
-    // Получить все чаты пользователя по его id
-    @GetMapping("/user/{id}")
+    // Получить все чаты пользователя по его id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/user/{id}")
     public ResponseEntity<List<ChatDTO>> getChatsByUserId(@PathVariable Long id) {
         logger.info("Got user id: {}", id);
         List<Chat> chats = chatService.getChatsByUserId(id); // Получаем список чатов пользователя
@@ -103,8 +103,8 @@ public class ChatController {
                 : ResponseEntity.ok(chatDTOS);
     }
 
-    // Получить все чаты
-    @GetMapping
+    // Получить все чаты. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping
     public ResponseEntity<List<ChatDTO>> getAllChats() {
         List<Chat> chats = chatService.getChats();  // Получаем список всех чатов
         List<ChatDTO> chatDTOS = chatService.convertToDTO(chats); // Преобразуем список чатов в DTO список

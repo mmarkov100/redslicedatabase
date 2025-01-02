@@ -40,8 +40,8 @@ public class MessageController {
     @Autowired
     private UserService userService;
 
-    // Создание нового сообщения
-    @PostMapping
+    // Создание нового сообщения. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @PostMapping
     public ResponseEntity<MessageDTO> createMessage(@Valid @RequestBody CreateMessageDTO createMessageDTO) {
         // Проверяем доступ к ветке
         Branch branch = messageService.validateBranchAccess(createMessageDTO.getBranchId(), createMessageDTO.getUidFirebase());
@@ -63,7 +63,7 @@ public class MessageController {
         return ResponseEntity.ok(messageDTO);
     }
 
-    // Создания сразу двух новых сообщений, от пользователя и нейросети
+    // Создания сразу двух новых сообщений, от пользователя и нейросети. Возвращает обновленный список сообщений ветки
     @PostMapping("/pair")
     public ResponseEntity<List<MessageDTO>> saveMessagePair(@Valid @RequestBody CreateMessagePairDTO createMessagePairDTO) {
         logger.info("Received message pair for branch ID: {}", createMessagePairDTO.toString());
@@ -86,8 +86,8 @@ public class MessageController {
         return ResponseEntity.ok(messageDTOs);
     }
 
-    // Получение сообщений для ветки
-    @GetMapping("/branch/{id}")
+    // Получение сообщений для ветки. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/branch/{id}")
     public ResponseEntity<List<MessageDTO>> getMessagesByBranchId(@PathVariable Long id) {
         logger.info("GET: Got branch id: {}", id);
         List<Message> messages = messageService.getMessagesByBranchId(id);
@@ -117,8 +117,8 @@ public class MessageController {
                 : ResponseEntity.ok(messageDTOS);
     }
 
-    // Получить сообщение по его ID
-    @GetMapping("/{id}")
+    // Получить сообщение по его ID. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}")
     public ResponseEntity<MessageDTO> getMessageById(@PathVariable Long id) {
 
         Optional<Message> message = messageService.getMessageById(id); // Получаем от сервиса данные
@@ -131,8 +131,8 @@ public class MessageController {
         return ResponseEntity.ok(messageDTO);
     }
 
-    // Получить сообщение по его ID с валидацией
-    @GetMapping("/{id}/validate")
+    // Получить сообщение по его ID с валидацией. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}/validate")
     public ResponseEntity<MessageDTO> getMessageByIdAndFirebase(@PathVariable Long id,
                                                                 @RequestParam String uidFirebase) {
         Message message = messageService.getMessageById(id)
@@ -147,9 +147,8 @@ public class MessageController {
         MessageDTO messageDTO = messageService.convertToDTO(message); // Преобразуем в DTO
         return ResponseEntity.ok(messageDTO);
     }
-
-    // Получить все сообщения
-    @GetMapping
+    // Получить все сообщения. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping
     public ResponseEntity<List<MessageDTO>> getMessages() {
         List<Message> messages = messageService.getAllMessages();
         List<MessageDTO> messagesDTO = messageService.convertToDTO(messages);
@@ -158,9 +157,8 @@ public class MessageController {
                 : ResponseEntity.ok(messagesDTO);
     }
 
-
-    // Удаление одного сообщения по его ID
-    @DeleteMapping("/{id}")
+    // Удаление одного сообщения по его ID. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteMessageById(@PathVariable Long id) {
         logger.info("Deleting message with ID: {}", id);
 
@@ -168,8 +166,8 @@ public class MessageController {
         return ResponseEntity.noContent().build(); // Возвращает 204 No Content
     }
 
-    // Удаление всех сообщений в ветке по ее ID
-    @DeleteMapping("/branch/{branchId}")
+    // Удаление всех сообщений в ветке по ее ID. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @DeleteMapping("/branch/{branchId}")
     public ResponseEntity<Void> deleteMessagesByBranchId(@PathVariable Long branchId) {
         logger.info("Deleting all messages in branch with ID: {}", branchId);
 

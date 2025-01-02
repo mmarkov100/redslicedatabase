@@ -42,8 +42,8 @@ public class UserController {
     }
 
 
-    // Получить существующего пользователя по id
-    @GetMapping("/{id}")
+    // Получить существующего пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         Optional<User> user = userService.getUserById(id); // Получаем возможного пользователя
         if (user.isEmpty()) { // Проверка на то, что юзер с таким id существует
@@ -84,8 +84,8 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
 
-    // Получить всех существующих пользователей
-    @GetMapping()
+    // Получить всех существующих пользователей. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping()
     public ResponseEntity<List<UserDTO>> getUsers (){
         List<UserDTO> userDTOS = userService.convertToDTO(userService.getUsers()); // Получение всех пользователей UserDTO
         return userDTOS.isEmpty() // Проверка на пустоту списка перед отправкой
@@ -93,8 +93,8 @@ public class UserController {
                 : ResponseEntity.ok(userDTOS);
     }
 
-    // Изменить существующего пользователя по id
-    @PutMapping("/{id}")
+    // Изменить существующего пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @PutMapping("/{id}")
     public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserDTO updatedUser) {
 
         Optional<User> existingUser = userService.getUserById(id); // Проверяем, существует ли пользователь с указанным id
@@ -108,8 +108,8 @@ public class UserController {
         return ResponseEntity.ok(userDTO);
     }
 
-    // Обновление настроек пользователя по uid файрбейза
-    @PutMapping("/uid/{uidFirebase}")
+    // Обновление настроек пользователя по uid файрбейза. ПОКА ЧТО НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @PutMapping("/uid/{uidFirebase}")
     public ResponseEntity<UserDTO> updateUserByUID(@PathVariable String uidFirebase, @Valid @RequestBody UpdateUserDTO updatedUser){
 
         Optional<User> existingUser = userService.getUserByUidFirebase(uidFirebase); // Проверяем, существует ли пользователь с указанным uid файрбейза
@@ -124,8 +124,8 @@ public class UserController {
 
     }
 
-    // Каскадное удаление пользователя по id
-    @DeleteMapping("/{id}")
+    // Каскадное удаление пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕи
+//    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
         logger.info("Deleting user with ID: {}", id);
 

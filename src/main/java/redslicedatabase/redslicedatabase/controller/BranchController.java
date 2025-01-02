@@ -14,14 +14,11 @@ import org.springframework.web.bind.annotation.*;
 import redslicedatabase.redslicedatabase.dto.BranchDTO.inbound.CreateBranchDTO;
 import redslicedatabase.redslicedatabase.dto.BranchDTO.outbound.BranchDTO;
 import redslicedatabase.redslicedatabase.model.Branch;
-import redslicedatabase.redslicedatabase.model.Chat;
 import redslicedatabase.redslicedatabase.service.BranchService;
 import redslicedatabase.redslicedatabase.service.ChatService;
-import redslicedatabase.redslicedatabase.service.UserService;
 
 import java.nio.file.AccessDeniedException;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -33,8 +30,6 @@ public class BranchController {
     @Autowired
     private BranchService branchService;
     @Autowired
-    private UserService userService;
-    @Autowired
     private ChatService chatService;
 
     // Создать новую ветку
@@ -45,10 +40,8 @@ public class BranchController {
         return ResponseEntity.ok(branchService.convertToDTO(createdBranch));
     }
 
-
-
-    // Получение конкретной ветки
-    @GetMapping("/{id}")
+    // Получение конкретной ветки. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}")
     public ResponseEntity<BranchDTO> getBranchById(@PathVariable Long id) {
 
         // Получаем от сервиса данные
@@ -63,8 +56,8 @@ public class BranchController {
         return ResponseEntity.ok(branchDTO);
     }
 
-    // Получение конкретной ветки с валидацией пользователя
-    @GetMapping("/{id}/validate")
+    // Получение конкретной ветки с валидацией пользователя. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}/validate")
     public ResponseEntity<BranchDTO> getBranchByIdAndUidFirebase(@PathVariable Long id,
                                                                  @RequestParam String uidFirebase) throws AccessDeniedException {
 
@@ -73,8 +66,8 @@ public class BranchController {
         return ResponseEntity.ok(branchService.convertToDTO(branch));
     }
 
-    // Получение всех веток чата
-    @GetMapping("/chat/{id}")
+    // Получение всех веток чата. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/chat/{id}")
     public ResponseEntity<List<BranchDTO>> getBranchByChatId(@PathVariable Long id) {
         logger.info("GET ID: Got chat id: {}", id);
         List<Branch> branches = branchService.getBranchesByChatId(id);
@@ -98,8 +91,8 @@ public class BranchController {
                 : ResponseEntity.ok(branchDTOs);
     }
 
-    // Получение всех веток пользователя
-    @GetMapping("/user/{id}")
+    // Получение всех веток пользователя. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/user/{id}")
     public ResponseEntity<List<BranchDTO>> getBranchesByUserId(@PathVariable Long id) {
         List<Branch> branches = branchService.getBranchesByUserId(id);
         List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
@@ -108,8 +101,8 @@ public class BranchController {
                 : ResponseEntity.ok(branchDTOs);
     }
 
-    // Получение всех веток пользователя с валидацией
-    @GetMapping("/user/uid/{uidFirebase}")
+    // Получение всех веток пользователя с валидацией. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/user/uid/{uidFirebase}")
     public ResponseEntity<List<BranchDTO>> getBranchesByUID(@PathVariable String uidFirebase) {
         List<Branch> branches = branchService.getBranchesByUserUidFirebase(uidFirebase);
         List<BranchDTO> branchDTOs = branchService.convertToDTO(branches);
@@ -118,8 +111,8 @@ public class BranchController {
                 : ResponseEntity.ok(branchDTOs);
     }
 
-    // Получение всех веток
-    @GetMapping
+    // Получение всех веток. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping
     public ResponseEntity<List<BranchDTO>> getAllBranches() {
 
         // Получаем все ветки
@@ -133,8 +126,8 @@ public class BranchController {
                 : ResponseEntity.ok(branchDTOs);
     }
 
-    // Получить дочерние ветки от ветки
-    @GetMapping("/{id}/children")
+    // Получить дочерние ветки от ветки. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @GetMapping("/{id}/children")
     public ResponseEntity<List<BranchDTO>> getChildBranches(@PathVariable Long id) {
 
         // Получаем все ветки
@@ -148,8 +141,8 @@ public class BranchController {
                 : ResponseEntity.ok(branchDTOs);
     }
 
-    // Каскадное удаление ветки
-    @DeleteMapping("/{id}")
+    // Каскадное удаление ветки. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+//    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBranchByIdAndFirebase(@PathVariable Long id) {
         branchService.deleteBranchById(id);
         return ResponseEntity.noContent().build(); // Возвращает 204 No Content
