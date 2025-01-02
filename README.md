@@ -56,25 +56,28 @@ src
 ### Настройка окружения
 
 1. Создайте базу данных PostgreSQL.
-2. Настройте `application.yml` или создайте файл `.env` для подключения к базе данных.
+2. Настройте `application.properties`.
 
-Пример `application.yml`:
+Пример `application.properties`:
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/redslice
-    username: your_db_user
-    password: your_db_password
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+```properties
+server.port=8083
+spring.application.name=RedSliceDatabase
 
-liquibase:
-  change-log: classpath:db/changelog/db.changelog-master.xml
+# Connecting to data source
+spring.datasource.url=jdbc:postgresql://localhost:5432/red_juice_db
+spring.datasource.username=username
+spring.datasource.password=password
+
+# Liquibase settings
+spring.liquibase.enabled=true
+spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.yaml
+
+# Disabling the HibernateDDL for using Liquibase
+spring.jpa.hibernate.ddl-auto=none
+spring.jpa.show-sql=true
+spring.jpa.properties.hibernate.format_sql=true
+
 ```
 
 ## 🌟 Особенности
