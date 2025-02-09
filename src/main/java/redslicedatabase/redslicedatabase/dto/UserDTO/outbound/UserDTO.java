@@ -4,8 +4,15 @@ package redslicedatabase.redslicedatabase.dto.UserDTO.outbound;
 DTO класс для отправки пользователю сохраненных данных
  */
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@Data
 public class UserDTO {
     private Long id;
     private String email;
@@ -29,11 +36,4 @@ public class UserDTO {
         this.dateCreate = dateCreate;
     }
 
-    // Геттеры
-    public Long getId() { return id; }
-    public String getEmail() { return email; }
-    public String getUidFirebase() { return uidFirebase; }
-    public Integer getTotalTokens() { return totalTokens; }
-    public Long getStarredChatId() { return starredChatId; }
-    public LocalDateTime getDateCreate() { return dateCreate; }
 }

@@ -4,8 +4,15 @@ package redslicedatabase.redslicedatabase.dto.ChatDTO.outbound;
 DTO для отправки ответа пользователю, исключает подробный список показа пользователя и выбранной ветки
  */
 
+import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.LocalDateTime;
 
+@Getter
+@Setter
+@Data
 public class ChatDTO {
     private Long id;
     private Long userId;
@@ -38,14 +45,4 @@ public class ChatDTO {
         this.dateCreate = dateCreate;
     }
 
-    // Геттеры и сеттеры
-    public Long getId() { return id; }
-    public Long getUserId() { return userId; }
-    public String getChatName() { return chatName; }
-    public Double getTemperature() { return temperature; }
-    public String getContext() { return context; }
-    public String getModelUri() { return modelUri; }
-    public Long getSelectedBranchId() { return selectedBranchId; }
-    public LocalDateTime getDateEdit() { return dateEdit; }
-    public LocalDateTime getDateCreate() { return dateCreate; }
 }
