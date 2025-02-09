@@ -103,7 +103,9 @@ public class MessageService {
         message.setText(createMessageDTO.getText());
         message.setTotalTokens(createMessageDTO.getTotalTokens());
         message.setInputTokens(createMessageDTO.getInputTokens());
+        System.out.println("CompletionTokens from DTO: " + createMessageDTO.getCompletionTokens());
         message.setCompletionTokens(createMessageDTO.getCompletionTokens());
+        System.out.println("CompletionTokens: " + message.getCompletionTokens());
         message.setDateCreate(java.time.LocalDateTime.now());
         return message;
     }
@@ -137,6 +139,7 @@ public class MessageService {
         Branch branch = branchRepository.findById(createMessagePairDTO.getBranchId())
                 .orElseThrow(() -> new RuntimeException("Branch not found"));
 
+        // Проверяем существование пользователя
         User user = userRepository.findByUidFirebase(createMessagePairDTO.getMessages().getFirst().getUidFirebase())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -144,6 +147,7 @@ public class MessageService {
         List<Message> messages = createMessagePairDTO.getMessages().stream()
                 .map(dto -> newMessage(dto, branch, user))
                 .toList();
+
 
         messageRepository.saveAll(messages);
     }

@@ -62,7 +62,6 @@ public class Message {
         return id;
     }
     public void setId(Long id){
-
         this.id = id;
     }
     public User getUser() {return user;}
@@ -89,19 +88,19 @@ public class Message {
         return totalTokens;
     }
     public void setTotalTokens(Integer totalTokens){
-        this.totalTokens = this.totalTokens;
+        this.totalTokens = totalTokens;
     }
     public Integer getInputTokens(){
         return inputTokens;
     }
     public void setInputTokens(Integer inputTokens){
-        this.inputTokens = this.inputTokens;
+        this.inputTokens = inputTokens;
     }
     public Integer getCompletionTokens(){
         return completionTokens;
     }
     public void setCompletionTokens(Integer completionTokens){
-        this.completionTokens = this.completionTokens;
+        this.completionTokens = completionTokens;
     }
     public LocalDateTime getDateCreate(){
         return dateCreate;
