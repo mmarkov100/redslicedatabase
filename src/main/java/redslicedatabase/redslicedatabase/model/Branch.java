@@ -5,13 +5,15 @@ package redslicedatabase.redslicedatabase.model;
  */
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 public class Branch {
 
     @Id
@@ -46,59 +48,6 @@ public class Branch {
     private LocalDateTime dateEdit = LocalDateTime.now(); // Дата изменения ветки
 
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания ветки
-
-
-    // Lombok не работает, поэтому геттеры и сеттеры вручную
-    public Long getId(){
-        return id;
-    }
-    public void setId(Long id){
-        this.id = id;
-    }
-    public User getUser() {return user;}
-    public void setUser(User user) {this.user = user;}
-    public Chat getChat(){
-        return chat;
-    }
-    public void setChat(Chat chat){
-        this.chat = chat;
-    }
-    public Branch getParentBranch(){
-        return parentBranch;
-    }
-    public void setParentBranch(Branch parentBranch){
-        this.parentBranch = parentBranch;
-    }
-    public Message getMessageStart(){
-        return messageStart;
-    }
-    public void setMessageStart(Message messageStart){
-        this.messageStart = messageStart;
-    }
-    public Boolean getIsRoot(){
-        return isRoot;
-    }
-    public void setIsRoot(Boolean isRoot){
-        this.isRoot = isRoot;
-    }
-    public List<Branch> getChildBranches() {
-        return childBranches;
-    }
-    public void setChildBranches(List<Branch> childBranches) {
-        this.childBranches = childBranches;
-    }
-    public LocalDateTime getDateEdit() {
-        return dateEdit;
-    }
-    public void setDateEdit(LocalDateTime dateEdit) {
-        this.dateEdit = dateEdit;
-    }
-    public LocalDateTime getDateCreate(){
-        return dateCreate;
-    }
-    public void setDateCreate(LocalDateTime dateCreate){
-        this.dateCreate = dateCreate;
-    }
 }
 
 

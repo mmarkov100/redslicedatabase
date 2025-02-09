@@ -6,13 +6,15 @@ package redslicedatabase.redslicedatabase.model;
  */
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Data
+@Getter
+@Setter
 @Table(name = "app_user") // Изменение имени таблицы, тк user зарезервировано Posgtgres'ом
 public class User {
 
@@ -42,48 +44,4 @@ public class User {
     private List<Message> messages; // Список сообщений пользователя
 
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания пользователя
-
-
-
-
-
-
-    // Lombok не работает, не знаю почему, поэтому так
-    public Long getId() {
-        return id;
-    }
-    public void setId(Long id){
-
-        this.id = id;
-    }
-    public String getEmail() {
-        return email;
-    }
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    public String getUidFirebase() {
-        return uidFirebase;
-    }
-    public void setUidFirebase(String uidFirebase) {
-        this.uidFirebase = uidFirebase;
-    }
-    public Integer getTotalTokens() {
-        return totalTokens;
-    }
-    public void setTotalTokens(Integer totalTokens) {
-        this.totalTokens = totalTokens;
-    }
-    public Chat getStarredChat() {
-        return starredChat;
-    }
-    public void setStarredChat(Chat starredChat) {
-        this.starredChat = starredChat;
-    }
-    public LocalDateTime getDateCreate() {
-        return dateCreate;
-    }
-    public void setDateCreate(LocalDateTime dateCreate) {
-        this.dateCreate = dateCreate;
-    }
 }

@@ -18,14 +18,17 @@ POST /messages
  */
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
+@Setter
+@Getter
 @Entity
-@Data
 public class Message {
 
+    // Lombok не работает, не знаю почему, поэтому так
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -54,62 +57,5 @@ public class Message {
 
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания сообщения
 
-    // Lombok не работает, не знаю почему, поэтому так
-    public Long getId(){
-        return id;
-    }
-    public void setId(Long id){
-        this.id = id;
-    }
-    public User getUser() {return user;}
-    public void setUser(User user) {this.user = user;}
-    public Branch getBranch(){
-        return branch;
-    }
-    public void setBranch(Branch branch){
-        this.branch = branch;
-    }
-    public String getRole(){
-        return role;
-    }
-    public void setRole(String role){
-        this.role = role;
-    }
-    public String getText(){
-        return text;
-    }
-    public void setText(String text){
-        this.text = text;
-    }
-    public Integer getTotalTokens(){
-        return totalTokens;
-    }
-    public void setTotalTokens(Integer totalTokens){
-        this.totalTokens = totalTokens;
-    }
-    public Integer getInputTokens(){
-        return inputTokens;
-    }
-    public void setInputTokens(Integer inputTokens){
-        this.inputTokens = inputTokens;
-    }
-    public Integer getCompletionTokens(){
-        return completionTokens;
-    }
-    public void setCompletionTokens(Integer completionTokens){
-        this.completionTokens = completionTokens;
-    }
-    public LocalDateTime getDateCreate(){
-        return dateCreate;
-    }
-    public void setDateCreate(LocalDateTime dateCreate){
-        this.dateCreate = dateCreate;
-    }
-    public String getUsedModel(){
-        return usedModel;
-    }
-    public void setUsedModel(String usedModel){
-        this.usedModel = usedModel;
-    }
 }
 

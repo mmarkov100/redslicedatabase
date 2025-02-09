@@ -82,7 +82,7 @@ public class MessageController {
         // Обновляем даты у ветки и чата
         branchService.updateBranchAndChatDates(branch);
 
-        logger.info("Saved message pair and retrieved branch history, total messages: {}", messageDTOs.size());
+        logger.info("Saved message pair and retrieved branch history, last message: {}", messageDTOs.getLast().toString());
         return ResponseEntity.ok(messageDTOs);
     }
 
