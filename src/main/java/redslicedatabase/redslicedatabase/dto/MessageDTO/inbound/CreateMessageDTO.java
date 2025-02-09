@@ -16,6 +16,7 @@ public class CreateMessageDTO {
     private Integer totalTokens;
     private Integer inputTokens;
     private Integer completionTokens;
+    private String usedModel;
 
 
 
@@ -63,5 +64,11 @@ public class CreateMessageDTO {
     }
     public void setCompletionTokens(Integer completionTokens) {
         this.completionTokens = completionTokens;
+    }
+    public String getUsedModel(){
+        return usedModel;
+    }
+    public void setUsedModel(String usedModel){
+        this.usedModel = usedModel;
     }
 }

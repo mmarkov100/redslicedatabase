@@ -15,6 +15,7 @@ public class MessageDTO {
     private Integer totalTokens;
     private Integer inputTokens;
     private Integer completionTokens;
+    private String usedModel;
     private LocalDateTime dateCreate;
 
     public MessageDTO(Long id,
@@ -25,7 +26,8 @@ public class MessageDTO {
                       Integer totalTokens,
                       Integer inputTokens,
                       Integer completionTokens,
-                      LocalDateTime dateCreate
+                      LocalDateTime dateCreate,
+                      String usedModel
                       ) {
         this.id = id;
         this.userId = userId;
@@ -36,6 +38,7 @@ public class MessageDTO {
         this.inputTokens = inputTokens;
         this.completionTokens = completionTokens;
         this.dateCreate = dateCreate;
+        this.usedModel = usedModel;
     }
 
 
@@ -95,5 +98,11 @@ public class MessageDTO {
     }
     public void setDateCreate(LocalDateTime dateCreate) {
         this.dateCreate = dateCreate;
+    }
+    public String getUsedModel(){
+        return usedModel;
+    }
+    public void setUsedModel(String usedModel){
+        this.usedModel = usedModel;
     }
 }

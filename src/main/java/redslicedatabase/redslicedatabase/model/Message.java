@@ -54,11 +54,6 @@ public class Message {
 
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания сообщения
 
-
-
-
-
-
     // Lombok не работает, не знаю почему, поэтому так
     public Long getId(){
         return id;

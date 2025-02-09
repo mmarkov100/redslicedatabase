@@ -103,10 +103,9 @@ public class MessageService {
         message.setText(createMessageDTO.getText());
         message.setTotalTokens(createMessageDTO.getTotalTokens());
         message.setInputTokens(createMessageDTO.getInputTokens());
-        System.out.println("CompletionTokens from DTO: " + createMessageDTO.getCompletionTokens());
         message.setCompletionTokens(createMessageDTO.getCompletionTokens());
-        System.out.println("CompletionTokens: " + message.getCompletionTokens());
         message.setDateCreate(java.time.LocalDateTime.now());
+        message.setUsedModel(createMessageDTO.getUsedModel());
         return message;
     }
 
@@ -121,7 +120,8 @@ public class MessageService {
                 message.getTotalTokens()  != null ? message.getTotalTokens() : 0,
                 message.getInputTokens() != null ? message.getInputTokens() : 0,
                 message.getCompletionTokens() != null ? message.getCompletionTokens() : 0,
-                message.getDateCreate()
+                message.getDateCreate(),
+                message.getUsedModel()
         );
     }
 
