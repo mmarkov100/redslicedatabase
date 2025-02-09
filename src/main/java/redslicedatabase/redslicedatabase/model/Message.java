@@ -50,6 +50,8 @@ public class Message {
 
     private Integer completionTokens;
 
+    private String usedModel;
+
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания сообщения
 
 
@@ -107,6 +109,12 @@ public class Message {
     }
     public void setDateCreate(LocalDateTime dateCreate){
         this.dateCreate = dateCreate;
+    }
+    public String getUsedModel(){
+        return usedModel;
+    }
+    public void setUsedModel(String usedModel){
+        this.usedModel = usedModel;
     }
 }
 

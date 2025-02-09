@@ -63,3 +63,16 @@ databaseChangeLog:
             referencedTableName: branch
             referencedColumnNames: id
             constraintName: fk_messages_branch_id
+  - changeSet:
+      id: 2
+      author: max
+      changes:
+        - addColumn:
+            tableName: message
+            columns:
+              - column:
+                  name: used_model
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: true  # Можно указать true или false, в зависимости от ваших требований
+
