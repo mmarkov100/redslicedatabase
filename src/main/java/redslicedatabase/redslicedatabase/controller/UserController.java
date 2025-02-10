@@ -69,7 +69,7 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
 
-    // Обновление настроек пользователя по uid файрбейза. ПОКА ЧТО НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
+    // Обновление настроек пользователя по uid файрбейза. ПОКА ЧТО НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ, БУДЕТ ПОЗЖЕ
 //    @PutMapping("/uid/{uidFirebase}")
     public ResponseEntity<UserDTO> updateUserByUID(@PathVariable String uidFirebase, @Valid @RequestBody UpdateUserDTO updatedUser){
 
