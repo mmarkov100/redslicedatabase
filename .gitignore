@@ -1,4 +1,5 @@
 src/main/resources/application.properties
+src/main/java/redslicedatabase/redslicedatabase/config/AppConfig.java
 
 HELP.md
 target/
