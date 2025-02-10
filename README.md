@@ -40,6 +40,7 @@ src
 ├── main
 │   ├── java
 │   │   └── redslicedatabase
+│   │       ├── config         // Конфигурационные файлы
 │   │       ├── controller     // REST-контроллеры
 │   │       ├── service        // Бизнес-логика
 │   │       ├── model          // Сущности JPA
@@ -80,6 +81,23 @@ spring.jpa.properties.hibernate.format_sql=true
 
 ```
 
+Также надо создать файд по директории src/main/java/redslicedatabase/redslicedatabase/config/AppConfig.java
+```java
+package redslicedatabase.redslicedatabase.config;
+
+import lombok.Getter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
+
+@Component
+@Configuration
+@Getter
+public class AppConfig {
+
+   private final String apiDatabaseKey = "someApiKey";
+}
+```
+Это нужно для доступа к базе данных только от бэкенда
 ## 🌟 Особенности
 
 - Полная валидация данных на уровне DTO.
