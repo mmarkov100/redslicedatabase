@@ -4,7 +4,6 @@ package redslicedatabase.redslicedatabase.service;
 Сервис для веток
  */
 
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -73,29 +72,9 @@ public class BranchService {
         return branchRepository.findById(id);
     }
 
-    // Метод получения всех веток
-    public List<Branch> getBranches() {
-        return branchRepository.findAll();
-    }
-
     // Метод получения веток пользователя
     public List<Branch> getBranchesByChatId(Long chatId) {
         return branchRepository.findByChatId(chatId);
-    }
-
-    // Метод получения дочерних веток
-    public List<Branch> getChildBranches(Long parentBranchId) {
-        return branchRepository.findByParentBranchId(parentBranchId);
-    }
-
-    // Получение всех веток пользователя по ID
-    public List<Branch> getBranchesByUserId(Long userId) {
-        return branchRepository.findAllByUserId(userId);
-    }
-
-    // Получение всех веток пользователя по UID Firebase
-    public List<Branch> getBranchesByUserUidFirebase(String uidFirebase) {
-        return branchRepository.findAllByUserUidFirebase(uidFirebase);
     }
 
     // Метод конвертации Branch в BranchDTO
@@ -151,26 +130,6 @@ public class BranchService {
         branch.setDateCreate(java.time.LocalDateTime.now());
 
         return branch;
-    }
-
-    // Метод проверки ветки конкретному пользователю
-    public Branch getBranchByIdWithAccessCheck(Long chatId, String uidFirebase) throws AccessDeniedException {
-        Branch branch = branchRepository.findById(chatId)
-                .orElseThrow(() -> new EntityNotFoundException("Chat with ID " + chatId + " not found"));
-
-        if (!Objects.equals(branch.getUser().getUidFirebase(), uidFirebase)) {
-            throw  new AccessDeniedException("Access denied for user UID: " + uidFirebase);
-        }
-
-        return branch;
-    }
-
-    // Метод удаления ветки по ID
-    @Transactional
-    public void deleteBranchById(Long branchId) {
-        branchRepository.findById(branchId).orElseThrow(() -> new RuntimeException("Branch with ID " + branchId + " not found"));
-
-        branchRepository.deleteById(branchId);
     }
 
     // Метод удаления ветки по ID с валидацией

@@ -14,8 +14,6 @@ import java.util.List;
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long> {
 
-    // Найти все сообщения в ветке по id ветки
-    List<Message> findByBranchId(Long branch_id);
     // Найти все сообщения в ветке по id ветки отсортированные по дате
     List<Message> findByBranchIdOrderByDateCreate(Long branch_id, Sort dateCreate);
 }

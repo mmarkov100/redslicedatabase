@@ -15,7 +15,6 @@ import redslicedatabase.redslicedatabase.model.User;
 import redslicedatabase.redslicedatabase.repository.ChatRepository;
 import redslicedatabase.redslicedatabase.repository.UserRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -33,10 +32,6 @@ public class UserService {
 
     public Optional<User> getUserById(Long id) {
         return userRepository.findById(id);
-    }
-
-    public List<User> getUsers (){
-        return userRepository.findAll();
     }
 
     public Optional<User> getUserByEmail(String email) {
@@ -63,19 +58,6 @@ public class UserService {
                 user.getStarredChat() != null ? user.getStarredChat().getId() : null,
                 user.getDateCreate()
         );
-    }
-
-    public List<UserDTO> convertToDTO(List<User> users) {
-        return users.stream()
-                .map(user -> new UserDTO(
-                        user.getId(),
-                        user.getEmail(),
-                        user.getUidFirebase(),
-                        user.getTotalTokens(),
-                        user.getStarredChat() != null ? user.getStarredChat().getId() : null,
-                        user.getDateCreate()
-                ))
-                .toList();
     }
 
     // Метод обновления настроек пользователя

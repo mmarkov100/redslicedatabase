@@ -23,7 +23,6 @@ import redslicedatabase.redslicedatabase.service.UserService;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/chats")
@@ -56,20 +55,6 @@ public class ChatController {
         return ResponseEntity.ok(chatDTO);
     }
 
-    // Получение конкретного чата по Id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @GetMapping("/{id}")
-    public ResponseEntity<ChatDTO> getChatById(@PathVariable Long id) {
-
-        Optional<Chat> chat = chatService.getChatById(id); // Получаем от сервиса данные
-        if (chat.isEmpty()) {// Если чат не найден, возвращаем 404 Not Found
-            logger.warn("GET ID: Chat with ID {} not found.", id);
-            return ResponseEntity.notFound().build();
-        }
-        logModel.logger(chat.get(), "Got chat by id");
-        ChatDTO chatDTO = chatService.convertToDTO(chat.get()); // Преобразуем в DTO
-        return ResponseEntity.ok(chatDTO);
-    }
-
     // Получение конкретного чата по Id и проверка, есть ли доступ у пользователя к этому чату
     @GetMapping("/{id}/validate")
     public ResponseEntity<ChatDTO> getChatByIdAndUidFirebase(@PathVariable Long id,
@@ -78,17 +63,6 @@ public class ChatController {
         Chat chat = chatService.getChatByIdWithAccessCheck(id, uidFirebase); // Отправляем в сервис
         logModel.logger(chat, "Got chat by id");
         return ResponseEntity.ok(chatService.convertToDTO(chat));
-    }
-
-    // Получить все чаты пользователя по его id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @GetMapping("/user/{id}")
-    public ResponseEntity<List<ChatDTO>> getChatsByUserId(@PathVariable Long id) {
-        logger.info("Got user id: {}", id);
-        List<Chat> chats = chatService.getChatsByUserId(id); // Получаем список чатов пользователя
-        List<ChatDTO> chatDTOS = chatService.convertToDTO(chats); // Преобразуем список чатов в DTO список
-        return chatDTOS.isEmpty() // Проверка на пустоту списка вместе с отправкой
-                ? ResponseEntity.notFound().build()
-                : ResponseEntity.ok(chatDTOS);
     }
 
     // Получить все чаты пользователя по его uid файрбейза
@@ -103,15 +77,6 @@ public class ChatController {
                 : ResponseEntity.ok(chatDTOS);
     }
 
-    // Получить все чаты. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @GetMapping
-    public ResponseEntity<List<ChatDTO>> getAllChats() {
-        List<Chat> chats = chatService.getChats();  // Получаем список всех чатов
-        List<ChatDTO> chatDTOS = chatService.convertToDTO(chats); // Преобразуем список чатов в DTO список
-        return chatDTOS.isEmpty() // Проверка на пустоту списка
-                ? ResponseEntity.notFound().build() // Если пустой, то возвращает пустоту и ничего не найдено
-                : ResponseEntity.ok(chatDTOS); // Иначе список чатов и статус ок
-    }
 
     // Изменить настройки существующего чата по id
     @PutMapping("/{id}")

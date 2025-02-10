@@ -63,16 +63,6 @@ public class ChatService {
         return branchRepository.save(rootBranch);
     }
 
-    // Поучение чата по его Id
-    public Optional<Chat> getChatById(Long id) {
-        return chatRepository.findById(id);
-    }
-
-    // Получение всех чатов
-    public List<Chat> getChats() {
-        return chatRepository.findAll();
-    }
-
     // Получение всех чатов пользователя
     public List<Chat> getChatsByUserId(Long userId) {
         return chatRepository.findByUserId(userId);

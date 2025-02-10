@@ -17,7 +17,6 @@ import redslicedatabase.redslicedatabase.logging.LogModel;
 import redslicedatabase.redslicedatabase.model.User;
 import redslicedatabase.redslicedatabase.service.UserService;
 
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -40,20 +39,6 @@ public class UserController {
         logModel.logger(createdUser, "Created user");
         return ResponseEntity.ok(userService.convertToDTO(createdUser)); // Отправляем в ответ какой пользователь был сохранен конвертируя в UserDTO
     }
-
-
-    // Получить существующего пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id); // Получаем возможного пользователя
-        if (user.isEmpty()) { // Проверка на то, что юзер с таким id существует
-            logger.warn("GET: User with ID {} not found.", id);
-            return ResponseEntity.notFound().build(); // Если нет пользователя с таким id, то выводим, что пользователя нет
-        }
-        logModel.logger(user.get(), "Got user");
-        return ResponseEntity.ok(userService.convertToDTO(user.get())); // Конвертируем в UserDTO и отправляем ответ
-    }
-
 
     // Получить пользователя по email или uidFirebase
     @GetMapping("/query")
@@ -84,30 +69,6 @@ public class UserController {
         return ResponseEntity.badRequest().build();
     }
 
-    // Получить всех существующих пользователей. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @GetMapping()
-    public ResponseEntity<List<UserDTO>> getUsers (){
-        List<UserDTO> userDTOS = userService.convertToDTO(userService.getUsers()); // Получение всех пользователей UserDTO
-        return userDTOS.isEmpty() // Проверка на пустоту списка перед отправкой
-                ? ResponseEntity.notFound().build()
-                : ResponseEntity.ok(userDTOS);
-    }
-
-    // Изменить существующего пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
-//    @PutMapping("/{id}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserDTO updatedUser) {
-
-        Optional<User> existingUser = userService.getUserById(id); // Проверяем, существует ли пользователь с указанным id
-        if (existingUser.isEmpty()) return ResponseEntity.notFound().build();  // Если пользователь не найден, возвращаем 404
-
-        // Обновляем информацию у пользователя
-        User savedUser = userService.updateSettings(existingUser.get(), updatedUser);
-
-        // Возвращаем обновленного пользователя в UserDTO
-        UserDTO userDTO = userService.convertToDTO(savedUser);
-        return ResponseEntity.ok(userDTO);
-    }
-
     // Обновление настроек пользователя по uid файрбейза. ПОКА ЧТО НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ
 //    @PutMapping("/uid/{uidFirebase}")
     public ResponseEntity<UserDTO> updateUserByUID(@PathVariable String uidFirebase, @Valid @RequestBody UpdateUserDTO updatedUser){
@@ -122,15 +83,6 @@ public class UserController {
         UserDTO userDTO = userService.convertToDTO(savedUser);
         return ResponseEntity.ok(userDTO);
 
-    }
-
-    // Каскадное удаление пользователя по id. НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕи
-//    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUserById(@PathVariable Long id) {
-        logger.info("Deleting user with ID: {}", id);
-
-        userService.deleteUserById(id);
-        return ResponseEntity.noContent().build(); // Возвращает 204 No Content
     }
 
     // Каскадное удаление пользователя по uid файрбейза
