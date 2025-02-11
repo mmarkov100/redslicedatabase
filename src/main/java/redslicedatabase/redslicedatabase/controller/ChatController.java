@@ -9,8 +9,10 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import redslicedatabase.redslicedatabase.config.AppConfig;
 import redslicedatabase.redslicedatabase.dto.ChatDTO.inbound.CreateChatDTO;
 import redslicedatabase.redslicedatabase.dto.ChatDTO.inbound.UpdateChatDTO;
 import redslicedatabase.redslicedatabase.dto.ChatDTO.outbound.ChatDTO;
@@ -23,6 +25,8 @@ import redslicedatabase.redslicedatabase.service.UserService;
 import java.nio.file.AccessDeniedException;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/chats")
@@ -36,10 +40,20 @@ public class ChatController {
     private UserService userService;
     @Autowired
     private LogModel logModel;
+    @Autowired
+    private AppConfig appConfig;
 
     // Создать новый чат
     @PostMapping
-    public ResponseEntity<ChatDTO> createChat(@RequestBody CreateChatDTO createChatDTO) {
+    public ResponseEntity<?> createChat(@RequestBody CreateChatDTO createChatDTO,
+                                              @RequestHeader String apiDBKey) {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
 
         Chat chat = chatService.convertToModel(createChatDTO); // Конвертируем полученный DTO в модель
         logModel.logger(chat, "Received chat"); // Вывод логов пришедших данных в чат
@@ -57,8 +71,16 @@ public class ChatController {
 
     // Получение конкретного чата по Id и проверка, есть ли доступ у пользователя к этому чату
     @GetMapping("/{id}/validate")
-    public ResponseEntity<ChatDTO> getChatByIdAndUidFirebase(@PathVariable Long id,
-                                                             @RequestParam String uidFirebase) throws AccessDeniedException {
+    public ResponseEntity<?> getChatByIdAndUidFirebase(@PathVariable Long id,
+                                                             @RequestParam String uidFirebase,
+                                                             @RequestHeader String apiDBKey) throws AccessDeniedException {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
 
         Chat chat = chatService.getChatByIdWithAccessCheck(id, uidFirebase); // Отправляем в сервис
         logModel.logger(chat, "Got chat by id");
@@ -67,7 +89,16 @@ public class ChatController {
 
     // Получить все чаты пользователя по его uid файрбейза
     @GetMapping("/user/uid/{uidFirebase}")
-    public ResponseEntity<List<ChatDTO>> getChatsByUserIdAndFirebase(@PathVariable String uidFirebase) {
+    public ResponseEntity<?> getChatsByUserIdAndFirebase(@PathVariable String uidFirebase,
+                                                                     @RequestHeader String apiDBKey) {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
+
         logger.info("Got user uid: {}", uidFirebase);
         Long id = userService.getUserIdByUidFirebase(uidFirebase); // Получаем id пользователя по uid файрбейза
         List<Chat> chats = chatService.getChatsByUserId(id); // Получаем список чатов пользователя
@@ -80,8 +111,16 @@ public class ChatController {
 
     // Изменить настройки существующего чата по id
     @PutMapping("/{id}")
-    public ResponseEntity<ChatDTO> updateChat(@PathVariable Long id,
-                                              @Valid @RequestBody UpdateChatDTO updatedChatDTO) throws AccessDeniedException {
+    public ResponseEntity<?> updateChat(@PathVariable Long id,
+                                              @Valid @RequestBody UpdateChatDTO updatedChatDTO,
+                                              @RequestHeader String apiDBKey) throws AccessDeniedException {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
 
         // Отправляем проверку доступа и получение чата в сервис
         Chat chat = chatService.getChatByIdWithAccessCheck(id,updatedChatDTO.getUidFirebase());
@@ -98,8 +137,17 @@ public class ChatController {
 
     // Каскадное удаление чата с проверкой доступа
     @DeleteMapping("/{id}/validate")
-    public ResponseEntity<Void> deleteChatById(@PathVariable Long id,
-                                               @RequestParam String uidFirebase) throws AccessDeniedException {
+    public ResponseEntity<?> deleteChatById(@PathVariable Long id,
+                                               @RequestParam String uidFirebase,
+                                               @RequestHeader String apiDBKey) throws AccessDeniedException {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
+
         chatService.deleteChatByIdWithAccessCheck(id, uidFirebase);
         return ResponseEntity.noContent().build();
     }

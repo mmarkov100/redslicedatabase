@@ -9,14 +9,18 @@ import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import redslicedatabase.redslicedatabase.config.AppConfig;
 import redslicedatabase.redslicedatabase.dto.UserDTO.outbound.UserDTO;
 import redslicedatabase.redslicedatabase.dto.UserDTO.inbound.UpdateUserDTO;
 import redslicedatabase.redslicedatabase.logging.LogModel;
 import redslicedatabase.redslicedatabase.model.User;
 import redslicedatabase.redslicedatabase.service.UserService;
 
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @RestController
@@ -29,11 +33,21 @@ public class UserController {
     private UserService userService;
     @Autowired
     private LogModel logModel;
+    @Autowired
+    private AppConfig appConfig;
 
 
     // Создание нового пользователя
     @PostMapping
-    public ResponseEntity<UserDTO> createUser(@RequestBody User user) {
+    public ResponseEntity<?> createUser(@RequestBody User user,
+                                        @RequestHeader String apiDBKey) {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
         logModel.logger(user, "Received user");
         User createdUser = userService.createUser(user); // Сохраняем в базе данных
         logModel.logger(createdUser, "Created user");
@@ -42,9 +56,17 @@ public class UserController {
 
     // Получить пользователя по email или uidFirebase
     @GetMapping("/query")
-    public ResponseEntity<UserDTO> getUserByQuery(
+    public ResponseEntity<?> getUserByQuery(
             @RequestParam(required = false) String email,
-            @RequestParam(required = false) String uidFirebase) {
+            @RequestParam(required = false) String uidFirebase,
+            @RequestHeader String apiDBKey) {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
         if (email != null) {
             Optional<User> user = userService.getUserByEmail(email);
             if (user.isEmpty()) {
@@ -71,7 +93,16 @@ public class UserController {
 
     // Обновление настроек пользователя по uid файрбейза. ПОКА ЧТО НЕ ИСПОЛЬЗУЕТСЯ В КОНЕЧНОМ ПРОДУКТЕ, БУДЕТ ПОЗЖЕ
 //    @PutMapping("/uid/{uidFirebase}")
-    public ResponseEntity<UserDTO> updateUserByUID(@PathVariable String uidFirebase, @Valid @RequestBody UpdateUserDTO updatedUser){
+    public ResponseEntity<?> updateUserByUID(@PathVariable String uidFirebase,
+                                                   @Valid @RequestBody UpdateUserDTO updatedUser,
+                                                   @RequestHeader String apiDBKey){
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
 
         Optional<User> existingUser = userService.getUserByUidFirebase(uidFirebase); // Проверяем, существует ли пользователь с указанным uid файрбейза
         if (existingUser.isEmpty()) return ResponseEntity.notFound().build();  // Если пользователь не найден, возвращаем 404
@@ -87,7 +118,15 @@ public class UserController {
 
     // Каскадное удаление пользователя по uid файрбейза
     @DeleteMapping("/uid/{uidFirebase}")
-    public ResponseEntity<Void> deleteUserByUid(@PathVariable String uidFirebase) {
+    public ResponseEntity<?> deleteUserByUid(@PathVariable String uidFirebase,
+                                                @RequestHeader String apiDBKey) {
+        if (!Objects.equals(apiDBKey, appConfig.getApiDatabaseKey())) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                            "error", "Wrong apiDBKey"
+                    ));
+        }
         logger.info("Deleting user with UID: {}", uidFirebase);
 
         Optional<User> existingUser = userService.getUserByUidFirebase(uidFirebase); // Ищем пользователя по uid
