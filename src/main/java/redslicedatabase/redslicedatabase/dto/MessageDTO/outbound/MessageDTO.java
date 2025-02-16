@@ -23,6 +23,7 @@ public class MessageDTO {
     private Integer inputTokens;
     private Integer completionTokens;
     private String usedModel;
+    private Double cost;
     private LocalDateTime dateCreate;
 
     public MessageDTO(Long id,
@@ -34,6 +35,7 @@ public class MessageDTO {
                       Integer inputTokens,
                       Integer completionTokens,
                       LocalDateTime dateCreate,
+                      Double cost,
                       String usedModel
                       ) {
         this.id = id;
@@ -45,6 +47,7 @@ public class MessageDTO {
         this.inputTokens = inputTokens;
         this.completionTokens = completionTokens;
         this.dateCreate = dateCreate;
+        this.cost = cost;
         this.usedModel = usedModel;
     }
 

@@ -49,11 +49,13 @@ public class Message {
 
     private Integer totalTokens; // Количество токенов, использованных ботом (nullable) при создании сообщения
 
-    private Integer inputTokens;
+    private Integer inputTokens; // Токены затраченные на "Прочтение" вводных данных при генерации
 
-    private Integer completionTokens;
+    private Integer completionTokens; // Токены, затраченные на генерацию
 
-    private String usedModel;
+    private String usedModel; // Использованная модель для генерации текста
+
+    private Double cost; // Стоимость генерации сообщения
 
     private LocalDateTime dateCreate = LocalDateTime.now(); // Дата создания сообщения
 

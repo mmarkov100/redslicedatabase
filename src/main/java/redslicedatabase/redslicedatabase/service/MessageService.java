@@ -51,6 +51,7 @@ public class MessageService {
         message.setCompletionTokens(createMessageDTO.getCompletionTokens());
         message.setDateCreate(java.time.LocalDateTime.now());
         message.setUsedModel(createMessageDTO.getUsedModel());
+        message.setCost(createMessageDTO.getCost());
         return message;
     }
 
@@ -66,6 +67,7 @@ public class MessageService {
                 message.getInputTokens() != null ? message.getInputTokens() : 0,
                 message.getCompletionTokens() != null ? message.getCompletionTokens() : 0,
                 message.getDateCreate(),
+                message.getCost(),
                 message.getUsedModel()
         );
     }
@@ -97,6 +99,7 @@ public class MessageService {
         messageRepository.saveAll(messages);
     }
 
+    // Метод проверки сообщения на валидацию ветки
     public Branch validateBranchAccess(Long branchId, String uidFirebase) {
         // Проверяем, что ветка существует
         Branch branch = branchService.getBranchById(branchId)

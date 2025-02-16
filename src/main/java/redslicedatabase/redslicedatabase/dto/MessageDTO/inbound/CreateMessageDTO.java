@@ -23,4 +23,5 @@ public class CreateMessageDTO {
     private Integer inputTokens;
     private Integer completionTokens;
     private String usedModel;
+    private Double cost;
 }
